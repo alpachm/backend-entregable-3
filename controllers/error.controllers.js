@@ -1,5 +1,12 @@
 const AppError = require('../utils/appError');
 
+const handleCastError22P02 = (req, res, next) => {
+  return new AppError('A data type is beign entered incorrectly', 400);
+};
+
+const handleJWTExpiredError = () =>
+  new AppError('JWT has expired, please login again', 401);
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -23,10 +30,6 @@ const sendErrorProd = (err, res) => {
   }
 };
 
-const handleCastError22P02 = (req, res, next) => {
-  return new AppError('A data type is beign entered incorrectly', 400);
-};
-
 exports.globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'fail';
@@ -38,8 +41,11 @@ exports.globalErrorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'production') {
     let error = err;
 
-    if (error.parent?.code === '22P02') error = handleCastError22P02();
+    console.log(error.name);
 
-    sendErrorProd(err, res);
+    if (error.parent?.code === '22P02') error = handleCastError22P02();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, res);
   }
 };

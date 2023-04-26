@@ -2,6 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const Restaurant = require('../models/restaurants.model');
 const Review = require('../models/reviews.model');
+const Meal = require('../models/meals.model');
 
 exports.validIfRestaurantExist = catchAsync(async (req, res, next) => {
   const { id } = req.params;
@@ -14,6 +15,11 @@ exports.validIfRestaurantExist = catchAsync(async (req, res, next) => {
     attributes: {
       exclude: ['createdAt', 'updatedAt'],
     },
+    include: [
+      {
+        model: Meal,
+      },
+    ],
   });
 
   if (!restaurant) next(new AppError('Restaurant was not found', 404));
